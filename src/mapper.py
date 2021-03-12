@@ -187,15 +187,12 @@ if __name__ == '__main__':
             
             pygame.draw.line(screen, color, scoords1, scoords2)
         pygame.display.update()
-<<<<<<< HEAD
-=======
     def draw_node(node, color):
         wx, wy = get_loc(id_to_waypoint[node])
         sc = world_to_screen(wx, wy)
         pygame.draw.rect(screen, color, pygame.Rect(sc, (5,5)))
         pygame.display.update()
 
->>>>>>> fb16fb5d1c0beb4be5627476b89023cdcb1acae8
 
     #draw_points(waypoint_list, pygame.Color(0,0,0))
     draw_topology(my_map.get_topology(), pygame.Color(255,0,0))
