@@ -24,6 +24,7 @@
         {
             "type": "vehicle.audi.tt",
             "id": "brandons_ride",
+            "spawn_point": {"x": 7.68560028076, "y": 154.669296265, "z": 0.281942427158, "roll": 0.0, "pitch": 0.0, "yaw": -90.2891159058},
             "sensors": 
             [
                 {

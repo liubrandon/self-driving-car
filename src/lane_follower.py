@@ -25,7 +25,7 @@ prev_CTE = 0
 
 current_speed = 0
 prev_speed_error = 0
-desired_speed = 90
+desired_speed = 55
 def vehicle_status_callback(cmd):
     global current_speed
     current_speed = cmd.velocity
@@ -62,9 +62,9 @@ def pid_control():
 
     cur_deriv = (prev_CTEs[-1]-prev_CTEs[0])/cur_len
 
-    kp = 0.0012 # proportional control, a gain that scales with the error
+    kp = 0.0011 # proportional control, a gain that scales with the error
                  # Moves the car toward the reference point (center of lane)
-    kd = 0.0005 # derivative control, job is to decrease oscillation (steers car away from reference line)
+    kd = 0.000 # derivative control, job is to decrease oscillation (steers car away from reference line)
                 # Acts like a "brake" conteracts the correctional force, reduces overshoot by slowing 
                 # the correction factor as the target reference is approached
                 

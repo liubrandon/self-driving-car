@@ -8,7 +8,7 @@
   <!-- Ego vehicle -->
   <arg name='role_name' default='brandons_ride'/>
   <arg name="vehicle_filter" default='vehicle.*'/>
-  <arg name="spawn_point" default=""/><!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
+  <arg name="spawn_point" default="377.414825439,6.3168129921,0.281942427158,0.0,134.097793579,0.0"/><!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
 
   <arg name="town" default='Town04'/>
 
@@ -19,7 +19,7 @@
   <arg name='fixed_delta_seconds' default=''/>
 
 
-  <include file="$(find cpsc335_carla)/launch/carla_ros_bridge.launch">
+  <include file="$(find research)/launch/carla_ros_bridge.launch">
     <arg name='host' value='$(arg host)'/>
     <arg name='port' value='$(arg port)'/>
     <arg name='town' value='$(arg town)'/>
@@ -31,9 +31,9 @@
   </include>
 
   <include file="$(find carla_spawn_objects)/launch/carla_example_ego_vehicle.launch">
-    <arg name="objects_definition_file" value='$(find cpsc335_carla)/config/objects.json'/>
+    <arg name="objects_definition_file" value='$(find research)/config/objects.json'/>
     <arg name='role_name' value='$(arg role_name)'/>
-    <arg name="spawn_point_ego_vehicle" value="$(arg spawn_point)"/>
+    <arg name="spawn_point_ego_vehicle" value="377.414825439,6.3168129921,0.281942427158,0.0,134.097793579,0.0"/>
     <arg name="spawn_sensors_only" value="false"/>
   </include>
 

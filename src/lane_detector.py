@@ -112,7 +112,7 @@ def detect(org_image):
     cv2.imshow('4 grayscale', img)
 
     #thresholding
-    after_thresholding = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 4) # TODO: Dynamic threshold
+    after_thresholding = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 10)
     cv2.imshow('5 after thresholding', after_thresholding)
     img = after_thresholding
 
