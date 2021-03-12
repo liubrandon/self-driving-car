@@ -252,13 +252,6 @@ if __name__ == '__main__':
                     # draw left lane from this lane
                     left_w = end_w.get_left_lane()
                     print("Result of get_left_lane: ", left_w)
-<<<<<<< HEAD
-                    if left_w != None:
-                        new_w_list = left_w.next_until_lane_end(waypoint_width)
-                        if not new_w_list: continue
-                        draw_points(new_w_list, pygame.Color(0,0,255))
-                        end_w = new_w_list[-1].next(10)[0]
-=======
                     if left_w != None: end_w = left_w
                     """if left_w != None:
                         new_w_list = left_w.next_until_lane_end(waypoint_width)
@@ -270,22 +263,10 @@ if __name__ == '__main__':
                         except IndexError as e:
                             print(e)
                             print(penult.next(0.5))"""
->>>>>>> fb16fb5d1c0beb4be5627476b89023cdcb1acae8
                 if event.key == pygame.K_r:
                     print("RIGHT")
                     # draw right lane from this lane
                     right_w = end_w.get_right_lane()
-<<<<<<< HEAD
-                    if right_w != None:
-                        new_w_list = right_w.next_until_lane_end(waypoint_width)
-                        if not new_w_list: continue
-                        draw_points(new_w_list, pygame.Color(0,0,255))
-                        end_w = new_w_list[-1].next(10)[0]
-
-
-    plt.scatter(x_vals,y_vals)
-    plt.show() 
-=======
                     if right_w != None: end_w = right_w
                     """if right_w != None:
                         new_w_list = right_w.next_until_lane_end(waypoint_width)
@@ -330,4 +311,3 @@ if __name__ == '__main__':
                         
     plt.scatter(x_vals,y_vals)
     plt.show()
->>>>>>> fb16fb5d1c0beb4be5627476b89023cdcb1acae8
