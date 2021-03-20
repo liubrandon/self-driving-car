@@ -8,30 +8,19 @@ import networkx as nx
 from carla_msgs.msg import CarlaWorldInfo, CarlaEgoVehicleInfo
 from geometry_msgs.msg import Vector3
 
-def junction_lanes(w):
-    junction = w.get_junction()
-    if junction == None:
-        return []
-    my_lanes = []
-    """for w_pairs in junction.get_waypoints(\
-            carla.LaneType.Driving | carla.LaneType.Entry |\
-            carla.LaneType.Exit | carla.LaneType.OffRamp |\
-            carla.LaneType.OnRamp):"""
-    for w_pairs in junction.get_waypoints(carla.LaneType.Any):
-        if w_pairs[0] == w:
-            my_lanes.append(w_pairs[1])
-        return my_lanes
-
 cur_position = None
 
-def update_location_global(msg):
-    global cur_position
-    cur_position = msg.wheels[0].position
-    print("In callback; cur_position = " + str(cur_position))
+vehicle_id = None
+
+def get_vehicle_id(msg):
+    global vehicle_id
+    vehicle_id = msg.id
+    print("In callback; vehicle_id = " + str(vehicle_id))
 
 if __name__ == '__main__':
     # Subscribe to vehicle status and location
-    # rospy.Subscriber('/carla/brandons_ride/vehicle_info', CarlaEgoVehicleInfo, update_location_global)
+    # TODO: change to brandons_ride
+    rospy.Subscriber('/carla/brandons_ride/vehicle_info', CarlaEgoVehicleInfo, get_vehicle_id)
     try:
         rospy.init_node('carla_mapper', anonymous=False)
         rospy.loginfo('Waiting for CARLA world (topic: /carla/world_info)...')
@@ -40,7 +29,7 @@ if __name__ == '__main__':
         rospy.logerr("Error while waiting for world info!")
         sys.exit(1)
     
-    host = rospy.get_param('/carla/host', '172.28.141.33')
+    host = rospy.get_param('/carla/host', 'localhost')
     port = rospy.get_param('/carla/port', 2000)
     timeout = rospy.get_param('/carla/timeout', 10)
 
@@ -60,7 +49,9 @@ if __name__ == '__main__':
     except rospy.ROSException:
         rospy.logerr("Error while trying to get the map")
         sys.exit(1)
-    vehicle = my_map.get_actor()
+    while vehicle_id == None:
+        pass
+    vehicle = carla_world.get_actor(vehicle_id)
     topo = my_map.get_topology()
     topo_ids = []
     id_to_waypoint = {}
@@ -106,10 +97,10 @@ if __name__ == '__main__':
         # get left lane
         lw = w.get_left_lane()
         if lw != None and lw.lane_type == carla.LaneType.Driving:
-            graph.add_edge(node, get_nearest_node(lw), cost=0)
+            graph.add_edge(node, get_nearest_node(lw), cost=0.1)
         rw = w.get_right_lane()
         if rw != None and rw.lane_type == carla.LaneType.Driving:
-            graph.add_edge(node, get_nearest_node(rw), cost=0)
+            graph.add_edge(node, get_nearest_node(rw), cost=0.1)
     
     def get_path(a,b):
         a = a.id
@@ -127,8 +118,6 @@ if __name__ == '__main__':
             retval.append((id_to_waypoint[node], id_to_waypoint[path[i+1]]))
         return retval
  
-    """nx.draw(graph)
-    plt.show()"""
     waypoint_width = 0.5 
 
     waypoint_list = my_map.generate_waypoints(waypoint_width)
@@ -152,6 +141,7 @@ if __name__ == '__main__':
 
     width, height = 3*640, 3*480
     screen = pygame.display.set_mode((width, height))
+    bg = pygame.Surface((width, height))
 
     car_rect = pygame.Rect(width/2, height/2, 5, 5) #pygame rect representing current location of car
     # the above rect is updated whenever we get vehicle position from a ROS callback
@@ -167,7 +157,6 @@ if __name__ == '__main__':
     screen.fill((255,255,255))
 
     def draw_points(my_ws, color):
-        print(len(my_ws))
         for w in my_ws:
             lane_width = w.lane_width
 
@@ -182,10 +171,10 @@ if __name__ == '__main__':
 
             # pygame.draw.rect(screen, color,\
             #         pygame.Rect(screen_coords, (wsf*lane_width,wsf*lane_width)))
-            pygame.draw.rect(screen, color,\
+            pygame.draw.rect(bg, color,\
                 pygame.Rect(screen_coords, (2,2)))
             #screen.fill((0,0,0),(screen_coords,(5,5)))
-        pygame.display.update()
+        #pygame.display.update()
     
     def draw_topology(topology_list, color):
         for edge in topology_list:
@@ -198,16 +187,15 @@ if __name__ == '__main__':
             scoords1 = world_to_screen(x1,y1)
             scoords2 = world_to_screen(x2, y2)
             
-            pygame.draw.line(screen, color, scoords1, scoords2)
-        pygame.display.update()
+            pygame.draw.line(bg, color, scoords1, scoords2)
+        #pygame.display.update()
     def draw_node(node, color):
         wx, wy = get_loc(id_to_waypoint[node])
         sc = world_to_screen(wx, wy)
-        pygame.draw.rect(screen, color, pygame.Rect(sc, (5,5)))
-        pygame.display.update()
+        pygame.draw.rect(bg, color, pygame.Rect(sc, (5,5)))
+        #pygame.display.update()
 
-
-    draw_points(waypoint_list, pygame.Color(0,0,0))
+    draw_points(waypoint_list, pygame.Color(255,0,255))
     draw_topology(my_map.get_topology(), pygame.Color(255,0,0))
 
     counter = 0
@@ -231,9 +219,6 @@ if __name__ == '__main__':
 
                 end_w = new_w_list[-1].next(10)[0]
 
-                #new_x, new_y = zip(*[(cur_w.transform.location.x,\
-                #        cur_w.transform.location.y) for cur_w in new_w_list])
-
                 draw_points(new_w_list, pygame.Color(0,0,255))
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -254,8 +239,6 @@ if __name__ == '__main__':
                     new_w_list = end_w.next_until_lane_end(waypoint_width)
                     draw_points(new_w_list, pygame.Color(0,0,255))
                     penult_w = new_w_list[-1]
-                    print("number of lanes in junction:")
-                    print len(junction_lanes(penult_w))
                     end_w = penult_w.next(10)[0]
                 if event.key == pygame.K_l:
                     print("LEFT")
@@ -263,26 +246,11 @@ if __name__ == '__main__':
                     left_w = end_w.get_left_lane()
                     print("Result of get_left_lane: ", left_w)
                     if left_w != None: end_w = left_w
-                    """if left_w != None:
-                        new_w_list = left_w.next_until_lane_end(waypoint_width)
-                        if not new_w_list: continue
-                        draw_points(new_w_list, pygame.Color(0,0,255))
-                        penult = new_w_list[-1]
-                        try:
-                            end_w = penult.next(10)[0]
-                        except IndexError as e:
-                            print(e)
-                            print(penult.next(0.5))"""
                 if event.key == pygame.K_r:
                     print("RIGHT")
                     # draw right lane from this lane
                     right_w = end_w.get_right_lane()
                     if right_w != None: end_w = right_w
-                    """if right_w != None:
-                        new_w_list = right_w.next_until_lane_end(waypoint_width)
-                        if not new_w_list: continue
-                        draw_points(new_w_list, pygame.Color(0,0,255))
-                        end_w = new_w_list[-1].next(10)[0]"""
                 if event.key == pygame.K_p:
                     # draw a path (approximately shortest) from current
                     #   location to location nearest mouse cursor
@@ -320,8 +288,11 @@ if __name__ == '__main__':
                         draw_node(node, pygame.Color(0,100,200))
         # Print curr vehicle location
         cur_location = vehicle.get_location()
+        scr_location = world_to_screen(cur_location.x, cur_location.y)
+        print(cur_location)
+        screen.blit(bg, (0,0))
         pygame.draw.rect(screen, pygame.Color(200, 200, 0),\
-                pygame.Rect(cur_location.x, cur_location.y, 15, 15))
+                pygame.Rect(scr_location[0], scr_location[1], 15, 15))
         pygame.display.flip()
                         
     plt.scatter(x_vals,y_vals)

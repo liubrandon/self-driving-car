@@ -27,6 +27,7 @@ current_speed = 0
 prev_speed_error = 0
 desired_speed = 55
 def vehicle_status_callback(cmd):
+    print("in lane follower callback")
     global current_speed
     current_speed = cmd.velocity
     
